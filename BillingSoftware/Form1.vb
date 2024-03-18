@@ -3,6 +3,7 @@
 Public Class BILLING
     Public ProductId As String
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+
         GeneratetheBillNo()
         InitialLoad()
     End Sub
@@ -454,6 +455,42 @@ Public Class BILLING
         End Using
     End Sub
 
+    'Private Sub LoadAutoComplete()
+    '    Dim con As New SqlConnection(cstring)
+
+    '    Try
+    '        Dim cmd As SqlCommand
+    '        Dim da As SqlDataAdapter
+    '        Dim ds As DataSet
+    '        Dim dt As DataTable
+    '        con.Open()
+    '        Dim query As String = "SELECT DISTINCT MobileNo FROM Customer"
+    '        cmd = New SqlCommand(query, con)
+    '        da = New SqlDataAdapter(cmd)
+    '        ds = New DataSet()
+    '        da.Fill(ds, "MobileNo")
+    '        dt = ds.Tables("MobileNo")
+
+    '        Dim col As New AutoCompleteStringCollection
+    '        For Each row As DataRow In dt.Rows
+    '            col.Add(row("MobileNo").ToString())
+    '        Next
+    '        MobileNo.AutoCompleteCustomSource = col
+    '        MobileNo.AutoCompleteMode = AutoCompleteMode.SuggestAppend
+    '        MobileNo.AutoCompleteSource = AutoCompleteSource.CustomSource
+
+    '    Catch ex As Exception
+    '        MessageBox.Show(ex.Message)
+    '    Finally
+    '        con.Close()
+    '    End Try
+    'End Sub
+
+
+
+
+
+
     Private Sub BarcodeCodetxt_KeyDown(sender As Object, e As KeyEventArgs) Handles BarcodeCodetxt.KeyDown
         If e.KeyCode = Keys.Enter Then
             GettheProduct(BarcodeCodetxt.Text)
@@ -496,13 +533,20 @@ Public Class BILLING
     End Sub
 
 
+
+
+    Private Sub AddUserbtn_Click(sender As Object, e As EventArgs) Handles AddUserbtn.Click
+        Dim frm2 = AddUser
+        frm2.Show()
+    End Sub
+
+    Private Sub MobileNo_TextChanged(sender As Object, e As EventArgs) Handles MobileNo.TextChanged
+
+    End Sub
+
     Private Sub MobileNo_KeyDown(sender As Object, e As KeyEventArgs) Handles MobileNo.KeyDown
         If e.KeyCode = Keys.Enter Then
             Billbtn.PerformClick()
         End If
-    End Sub
-
-    Private Sub AddUserbtn_Click(sender As Object, e As EventArgs) Handles AddUserbtn.Click
-
     End Sub
 End Class

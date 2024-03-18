@@ -78,7 +78,7 @@ Partial Class AddUser
         Me.Nametxt.Location = New System.Drawing.Point(93, 46)
         Me.Nametxt.Name = "Nametxt"
         Me.Nametxt.Size = New System.Drawing.Size(186, 22)
-        Me.Nametxt.TabIndex = 5
+        Me.Nametxt.TabIndex = 0
         '
         'addbtn
         '

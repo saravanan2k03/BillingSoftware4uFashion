@@ -1,9 +1,9 @@
-﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
 Partial Class BILLING
     Inherits System.Windows.Forms.Form
 
     'Form overrides dispose to clean up the component list.
-    <System.Diagnostics.DebuggerNonUserCode()> _
+    <System.Diagnostics.DebuggerNonUserCode()>
     Protected Overrides Sub Dispose(ByVal disposing As Boolean)
         Try
             If disposing AndAlso components IsNot Nothing Then
@@ -20,15 +20,15 @@ Partial Class BILLING
     'NOTE: The following procedure is required by the Windows Form Designer
     'It can be modified using the Windows Form Designer.  
     'Do not modify it using the code editor.
-    <System.Diagnostics.DebuggerStepThrough()> _
+    <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Dim DataGridViewCellStyle1 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Dim DataGridViewCellStyle2 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
+        Me.MobileNo = New System.Windows.Forms.RichTextBox()
         Me.AddUserbtn = New System.Windows.Forms.Button()
         Me.Billbtn = New System.Windows.Forms.Button()
         Me.Label7 = New System.Windows.Forms.Label()
-        Me.MobileNo = New System.Windows.Forms.RichTextBox()
         Me.BarcodeCodetxt = New System.Windows.Forms.RichTextBox()
         Me.Label1 = New System.Windows.Forms.Label()
         Me.Label6 = New System.Windows.Forms.Label()
@@ -58,10 +58,10 @@ Partial Class BILLING
         '
         'GroupBox1
         '
+        Me.GroupBox1.Controls.Add(Me.MobileNo)
         Me.GroupBox1.Controls.Add(Me.AddUserbtn)
         Me.GroupBox1.Controls.Add(Me.Billbtn)
         Me.GroupBox1.Controls.Add(Me.Label7)
-        Me.GroupBox1.Controls.Add(Me.MobileNo)
         Me.GroupBox1.Controls.Add(Me.BarcodeCodetxt)
         Me.GroupBox1.Controls.Add(Me.Label1)
         Me.GroupBox1.Controls.Add(Me.Label6)
@@ -83,10 +83,22 @@ Partial Class BILLING
         Me.GroupBox1.TabStop = False
         Me.GroupBox1.Text = "BILLING SECTION"
         '
+        'MobileNo
+        '
+        Me.MobileNo.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.MobileNo.Font = New System.Drawing.Font("Microsoft Sans Serif", 18.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.MobileNo.Location = New System.Drawing.Point(6, 694)
+        Me.MobileNo.Multiline = False
+        Me.MobileNo.Name = "MobileNo"
+        Me.MobileNo.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Horizontal
+        Me.MobileNo.Size = New System.Drawing.Size(290, 58)
+        Me.MobileNo.TabIndex = 4
+        Me.MobileNo.Text = ""
+        '
         'AddUserbtn
         '
         Me.AddUserbtn.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.2!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.AddUserbtn.Location = New System.Drawing.Point(4, 756)
+        Me.AddUserbtn.Location = New System.Drawing.Point(4, 758)
         Me.AddUserbtn.Name = "AddUserbtn"
         Me.AddUserbtn.Size = New System.Drawing.Size(136, 52)
         Me.AddUserbtn.TabIndex = 19
@@ -96,7 +108,7 @@ Partial Class BILLING
         'Billbtn
         '
         Me.Billbtn.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.2!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Billbtn.Location = New System.Drawing.Point(148, 756)
+        Me.Billbtn.Location = New System.Drawing.Point(146, 758)
         Me.Billbtn.Name = "Billbtn"
         Me.Billbtn.Size = New System.Drawing.Size(148, 52)
         Me.Billbtn.TabIndex = 18
@@ -112,18 +124,6 @@ Partial Class BILLING
         Me.Label7.Size = New System.Drawing.Size(95, 22)
         Me.Label7.TabIndex = 16
         Me.Label7.Text = "Mobile No:"
-        '
-        'MobileNo
-        '
-        Me.MobileNo.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.MobileNo.Font = New System.Drawing.Font("Microsoft Sans Serif", 18.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.MobileNo.Location = New System.Drawing.Point(6, 694)
-        Me.MobileNo.Multiline = False
-        Me.MobileNo.Name = "MobileNo"
-        Me.MobileNo.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Horizontal
-        Me.MobileNo.Size = New System.Drawing.Size(290, 58)
-        Me.MobileNo.TabIndex = 15
-        Me.MobileNo.Text = ""
         '
         'BarcodeCodetxt
         '
@@ -375,6 +375,8 @@ Partial Class BILLING
         Me.Controls.Add(Me.BillingGrid)
         Me.Controls.Add(Me.GroupBox1)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog
+        Me.MaximizeBox = False
+        Me.MinimizeBox = False
         Me.Name = "BILLING"
         Me.Text = "BILLING"
         Me.GroupBox1.ResumeLayout(False)
@@ -408,8 +410,8 @@ Partial Class BILLING
     Friend WithEvents GrandTotaltxt As RichTextBox
     Friend WithEvents Billbtn As Button
     Friend WithEvents Label7 As Label
-    Friend WithEvents MobileNo As RichTextBox
     Friend WithEvents GroupBox2 As GroupBox
     Friend WithEvents grandtot As RichTextBox
     Friend WithEvents AddUserbtn As Button
+    Friend WithEvents MobileNo As RichTextBox
 End Class

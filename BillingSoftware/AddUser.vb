@@ -20,20 +20,32 @@ Public Class AddUser
             Me.Nametxt.Clear()
             Me.Mobiletxt.Clear()
             Me.placetxt.Clear()
+            Me.Close()
         Else
             MsgBox("User Not Added")
         End If
     End Sub
 
     Private Sub AddUser_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        Me.Nametxt.Focus()
         Me.Nametxt.Clear()
         Me.Mobiletxt.Clear()
         Me.placetxt.Clear()
+        Me.Nametxt.Focus()
     End Sub
 
     Private Sub clearbtn_Click(sender As Object, e As EventArgs) Handles clearbtn.Click
         Me.Nametxt.Clear()
         Me.Mobiletxt.Clear()
         Me.placetxt.Clear()
+        Me.Nametxt.Focus()
+
+    End Sub
+
+
+    Private Sub placetxt_KeyDown(sender As Object, e As KeyEventArgs) Handles placetxt.KeyDown
+        If e.KeyCode = Keys.Enter Then
+            addbtn.PerformClick()
+        End If
     End Sub
 End Class
