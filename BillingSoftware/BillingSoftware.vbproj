@@ -80,11 +80,11 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Connection.vb" />
-    <Compile Include="Form1.vb">
+    <Compile Include="BillingModule.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.vb">
-      <DependentUpon>Form1.vb</DependentUpon>
+    <Compile Include="BillingModule.Designer.vb">
+      <DependentUpon>BillingModule.vb</DependentUpon>
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="My Project\AssemblyInfo.vb" />
@@ -107,8 +107,8 @@
     <EmbeddedResource Include="AddUser.resx">
       <DependentUpon>AddUser.vb</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.vb</DependentUpon>
+    <EmbeddedResource Include="BillingModule.resx">
+      <DependentUpon>BillingModule.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="My Project\Resources.resx">
       <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
