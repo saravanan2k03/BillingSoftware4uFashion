@@ -1,11 +1,34 @@
 ﻿Imports System.Data.SqlClient
+Imports System.Security.Cryptography
+Imports System.Windows.Forms.VisualStyles.VisualStyleElement
 
 Public Class BILLING
     Public ProductId As String
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-
+        Me.BarcodeCodetxt.Focus()
+        LoadAutoComplete()
         GeneratetheBillNo()
         InitialLoad()
+        Dim validate As New DataGridViewButtonColumn()
+        Dim delete As New DataGridViewButtonColumn()
+        With validate
+            .Name = "val"
+            .HeaderText = "UPDATE"
+            .Text = "UPDATE"
+            .UseColumnTextForButtonValue = True
+            .CellTemplate = New DataGridViewButtonCell()
+        End With
+        With delete
+            .Name = "del"
+            .HeaderText = "DELETE"
+            .Text = "DELETE"
+            .CellTemplate = New DataGridViewButtonCell()
+        End With
+        validate.UseColumnTextForButtonValue = True
+        delete.UseColumnTextForButtonValue = True
+        BillingGrid.Columns.Add(validate)
+        BillingGrid.Columns.Add(delete)
+
     End Sub
 
 
@@ -165,54 +188,16 @@ Public Class BILLING
 
     End Sub
 
-    Public Function QuantityCheck(Product_id As Int32, CurrentQuantity As Int32)
-        Dim Query As String = "select Product_id,Quantity from Products where Product_id =@Product_id"
-        Dim con As SqlConnection = New SqlConnection(cstring)
-        Try
-            Using command As New SqlCommand(Query, con)
-                command.Parameters.AddWithValue("@Product_id", Product_id)
-                con.Open()
-                Using reader As SqlDataReader = command.ExecuteReader()
-                    If reader.HasRows Then
-                        While reader.Read()
-                            Dim Quantity As Int32 = reader("Quantity")
-                            If CurrentQuantity <= Quantity Then
-                                Return 1
-                            Else
-                                Return -1
-                            End If
-                        End While
-                    End If
-                End Using
 
-            End Using
-            ' Execute the query
-        Catch ex As Exception
-            MsgBox($"SQL Exception occurred QuantityCheck: {ex.Message}", MsgBoxStyle.Critical, "SQL Error")
-            Return -1
-        Finally
-            con.Close()
-        End Try
-
-
-    End Function
     Private Sub UpdateProduct(Ref_id As String, Quantity As String, Price As String)
         Dim a As Integer
         Dim t As String
         Dim newQuantity As String
         Dim Total As Int32
         newQuantity = InputBox("Enter the Quantity", "UPDATE")
-        Do Until IsNumeric(newQuantity) AndAlso (newQuantity = "" OrElse Convert.ToInt32(newQuantity) > 0)
-            newQuantity = InputBox("Enter the Quantity", "UPDATE")
-            If newQuantity = "" Then
-                MsgBox("Operation canceled by user.", vbOKOnly, "Canceled")
-                Exit Sub ' Exit the subroutine if the user cancels
-            ElseIf Not IsNumeric(newQuantity) Then
-                MsgBox("Please enter a valid number for Quantity", vbOKOnly, "Invalid input")
-            End If
-        Loop
+
         ' After loop, newQuantity is either a valid number or empty string
-        If newQuantity <> "" Then
+        If newQuantity <> "" And IsNumeric(newQuantity) Then
             ' If newQuantity is a valid number, perform calculations
 
             Total = CInt(newQuantity) * CInt(Price)
@@ -231,54 +216,54 @@ Public Class BILLING
                 If GetProductId <> -1 Then
                     Dim QuantityCheckDataelse As Int32 = QuantityCheck(GetProductId, Convert.ToInt32(newQuantity))
                     If QuantityCheckDataelse = 1 Then
-                        QueryProcess(updateQuery, updateParameter)
-                        LoadGrid(Me.Bill_no.Text)
+
+                        If QueryProcess(updateQuery, updateParameter) = 1 Then
+                            LoadGrid(Me.Bill_no.Text)
+                            MsgBox("Product Updated!")
+                        End If
+
                     Else
                         MsgBox("Add Product In Inventory")
                     End If
                 End If
 
             End If
+        Else
+            Exit Sub
         End If
     End Sub
 
-    Private Function GetProductIdUsingRefId(ref_id As Int32)
-        Dim Query As String = "select Product_id  from Billing where ref_id =@ref_id"
-        Dim con As SqlConnection = New SqlConnection(cstring)
-        Try
-            Using command As New SqlCommand(Query, con)
-                command.Parameters.AddWithValue("@ref_id", ref_id)
-                con.Open()
-                Using reader As SqlDataReader = command.ExecuteReader()
-                    If reader.HasRows Then
-                        While reader.Read()
-                            Return Convert.ToInt32(reader("Product_id"))
-                        End While
-                    Else
-                        Return -1
-                    End If
-                End Using
 
+
+
+    Private Function DeleteProduct(Sqlquery As String, Parameters As List(Of SqlParameter))
+        Try
+            Using con As SqlConnection = New SqlConnection(cstring)
+                con.Open()
+                Using command1 As New SqlCommand(Sqlquery, con)
+                    ' Add parameters to the SqlCommand
+                    For Each parameter As SqlParameter In Parameters
+                        command1.Parameters.Add(parameter)
+                    Next
+                    command1.ExecuteNonQuery()
+                End Using
             End Using
-            ' Execute the query
+            ' If execution completes without errors, return 1
+            Return 1
         Catch ex As Exception
-            MsgBox($"SQL Exception occurred GetProductIdUsingRefId: {ex.Message}", MsgBoxStyle.Critical, "SQL Error")
+            ' Log the exception or handle it appropriately
+            Debug.WriteLine("An error occurred: " & ex.Message)
+            ' If an error occurs, return -1
             Return -1
-        Finally
-            con.Close()
         End Try
     End Function
-
-
-    Private Sub DeleteProduct()
-
-    End Sub
     Private Sub LoadGrid(BillNo As String)
         Try
             Dim query As String = "select ref_id As 'REF ID',pro.Product_name As 'PRODUCT NAME',cat.Category As 'CATEGORY',Brand.Brand As 'BRAND',Bill.Quantity As 'QUANTITY',Bill.Price As 'PRICE',Bill.Total 'TOTAL' from dbo.Billing As Bill inner join Products As pro on pro.Product_id = Bill.Product_id  inner join Category As cat on cat.Cat_id = pro.Cat_id inner join Brands As Brand on Brand.Brand_id = pro.Brand_id where Bill.Status = 0 And Bill.Billing_no = @BillNO"
             Dim parameters As New List(Of SqlParameter)
             parameters.Add(New SqlParameter("@BillNO", BillNo))
             gridWithPram(BillingGrid, query, {0, 1, 2, 3, 4, 5, 6}.ToList, {100, 150, 150, 150, 80, 100, 100}.ToList, parameters)
+
             'CalCulate GrandTotal
             CalculateGrandTotal(BillNo)
         Catch ex As Exception
@@ -317,28 +302,7 @@ Public Class BILLING
         End Try
 
     End Sub
-    Private Function HasDataCheck(BillNo As String) As Integer
-        Dim Query As String = "SELECT * FROM Billing WHERE Billing_no = @BillNo"
-        Dim con As SqlConnection = New SqlConnection(cstring)
-        Try
-            Using command As New SqlCommand(Query, con)
-                command.Parameters.AddWithValue("@BillNo", BillNo)
-                con.Open()
-                Using reader As SqlDataReader = command.ExecuteReader()
-                    If reader.HasRows Then
-                        Return 1
-                    Else
-                        Return -1
-                    End If
-                End Using
-            End Using
-        Catch ex As Exception
-            MsgBox($"SQL Exception occurred in HasDataCheck: {ex.Message}", MsgBoxStyle.Critical, "SQL Error")
-            Return -1
-        Finally
-            con.Close()
-        End Try
-    End Function
+
 
     Private Sub GeneratetheBillNo()
         Dim random As New Random()
@@ -406,85 +370,33 @@ Public Class BILLING
 
     End Sub
 
+    Private Sub LoadAutoComplete()
+        Dim con As New SqlConnection(cstring)
 
-    Private Function GetBillingDetails(billingNo As String) As DataTable
-        Dim query As String = "SELECT Product_id, Quantity FROM Billing WHERE Billing_no = @BillingNo"
-        Dim dataTable As New DataTable()
-
-        Using con As New SqlConnection(cstring)
-            Using cmd As New SqlCommand(query, con)
-                cmd.Parameters.AddWithValue("@BillingNo", billingNo)
-                con.Open()
-                Using adapter As New SqlDataAdapter(cmd)
-                    adapter.Fill(dataTable)
-                End Using
-            End Using
-        End Using
-
-        Return dataTable
-    End Function
-
-
-    Private Function FinalizeBillingForReduceQuantity(billingNo As String) As Integer
         Try
-            Dim billingDetails As DataTable = GetBillingDetails(billingNo)
-            For Each row As DataRow In billingDetails.Rows
-                Dim productId As String = row("Product_id").ToString()
-                Dim quantity As Integer = Convert.ToInt32(row("Quantity"))
-                'Dim Quantitycheckdata As Int32 = QuantityCheck(Convert.ToInt32(productId), Convert.ToInt32(quantity))
-                UpdateProductQuantity(productId, quantity)
+            Dim cmd As SqlCommand
+            Dim da As SqlDataAdapter
+            Dim ds As DataSet
+            Dim dt As DataTable
+            con.Open()
+            Dim query As String = "SELECT DISTINCT MobileNo FROM Customer"
+            cmd = New SqlCommand(query, con)
+            da = New SqlDataAdapter(cmd)
+            ds = New DataSet()
+            da.Fill(ds, "MobileNo")
+            dt = ds.Tables("MobileNo")
+
+            Dim col As New AutoCompleteStringCollection
+            For Each row As DataRow In dt.Rows
+                col.Add(row("MobileNo").ToString())
             Next
-            Return 1
-
+            MobileNo.AutoCompleteCustomSource = col
         Catch ex As Exception
-            MsgBox($"SQL Exception occurred FinalizeBillingForReduceQuantity: {ex.Message}", MsgBoxStyle.Critical, "SQL Error")
-            Return -1
+            MessageBox.Show(ex.Message)
+        Finally
+            con.Close()
         End Try
-    End Function
-
-    Private Sub UpdateProductQuantity(productId As String, quantity As Integer)
-        Dim query As String = "UPDATE Products SET Quantity = Quantity - @Quantity WHERE Product_id = @ProductId"
-
-        Using con As New SqlConnection(cstring)
-            Using cmd As New SqlCommand(query, con)
-                cmd.Parameters.AddWithValue("@ProductId", Convert.ToInt32(productId))
-                cmd.Parameters.AddWithValue("@Quantity", quantity)
-                con.Open()
-                cmd.ExecuteNonQuery()
-            End Using
-        End Using
     End Sub
-
-    'Private Sub LoadAutoComplete()
-    '    Dim con As New SqlConnection(cstring)
-
-    '    Try
-    '        Dim cmd As SqlCommand
-    '        Dim da As SqlDataAdapter
-    '        Dim ds As DataSet
-    '        Dim dt As DataTable
-    '        con.Open()
-    '        Dim query As String = "SELECT DISTINCT MobileNo FROM Customer"
-    '        cmd = New SqlCommand(query, con)
-    '        da = New SqlDataAdapter(cmd)
-    '        ds = New DataSet()
-    '        da.Fill(ds, "MobileNo")
-    '        dt = ds.Tables("MobileNo")
-
-    '        Dim col As New AutoCompleteStringCollection
-    '        For Each row As DataRow In dt.Rows
-    '            col.Add(row("MobileNo").ToString())
-    '        Next
-    '        MobileNo.AutoCompleteCustomSource = col
-    '        MobileNo.AutoCompleteMode = AutoCompleteMode.SuggestAppend
-    '        MobileNo.AutoCompleteSource = AutoCompleteSource.CustomSource
-
-    '    Catch ex As Exception
-    '        MessageBox.Show(ex.Message)
-    '    Finally
-    '        con.Close()
-    '    End Try
-    'End Sub
 
 
 
@@ -511,17 +423,6 @@ Public Class BILLING
         InitialLoad()
     End Sub
 
-
-
-    Private Sub BillingGrid_CellClick(sender As Object, e As DataGridViewCellEventArgs) Handles BillingGrid.CellClick
-        If e.RowIndex >= 0 AndAlso e.ColumnIndex >= 0 Then ' Ensure a valid cell is clicked
-            Dim RefId As String = BillingGrid.Rows(e.RowIndex).Cells(0).Value.ToString()
-            Dim Quantity As String = BillingGrid.Rows(e.RowIndex).Cells(4).Value.ToString()
-            Dim Price As String = BillingGrid.Rows(e.RowIndex).Cells(5).Value.ToString()
-            UpdateProduct(RefId, Quantity, Price)
-        End If
-    End Sub
-
     Private Sub Quantity_KeyDown(sender As Object, e As KeyEventArgs) Handles Quantity.KeyDown
         If e.KeyCode = Keys.Enter Then
             Button2.PerformClick()
@@ -540,9 +441,43 @@ Public Class BILLING
         frm2.Show()
     End Sub
 
-    Private Sub MobileNo_TextChanged(sender As Object, e As EventArgs) Handles MobileNo.TextChanged
 
+
+    Private Sub Form1_KeyDown(sender As Object, e As KeyEventArgs) Handles Me.KeyDown
+        Select Case e.KeyCode
+            Case Keys.F3
+                BarcodeCodetxt.Focus()
+        End Select
+        Select Case e.Alt And e.KeyCode
+
+            Case Keys.F7
+                Billbtn.PerformClick()
+
+        End Select
     End Sub
+
+    Private Sub BillingGrid_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles BillingGrid.CellContentClick
+        If BillingGrid.Columns(e.ColumnIndex).Name = "del" Then ' Ensure a valid cell is clicked
+            Dim RefId As String = BillingGrid.Rows(e.RowIndex).Cells(2).Value.ToString()
+            Dim DeleteQuery As String = "DELETE FROM Billing WHERE ref_id=@RefId;"
+            Dim parameters As New List(Of SqlParameter)
+            parameters.Add(New SqlParameter("@RefId", Convert.ToInt32(RefId)))
+            If DeleteProduct(DeleteQuery, parameters) = 1 Then
+                LoadGrid(Me.Bill_no.Text)
+                CalculateGrandTotal(Me.Bill_no.Text)
+                MsgBox("Deleted The Product!")
+            End If
+
+        ElseIf BillingGrid.Columns(e.ColumnIndex).Name = "val" Then
+                Dim RefId As String = BillingGrid.Rows(e.RowIndex).Cells(2).Value.ToString()
+            Dim Quantity As String = BillingGrid.Rows(e.RowIndex).Cells(6).Value.ToString()
+            Dim Price As String = BillingGrid.Rows(e.RowIndex).Cells(7).Value.ToString()
+            BillingGrid.Rows(e.RowIndex).Selected = True
+            Dim dr As DataGridViewRow = BillingGrid.SelectedRows(0)
+            UpdateProduct(RefId, Quantity, Price)
+        End If
+    End Sub
+
 
     Private Sub MobileNo_KeyDown(sender As Object, e As KeyEventArgs) Handles MobileNo.KeyDown
         If e.KeyCode = Keys.Enter Then
