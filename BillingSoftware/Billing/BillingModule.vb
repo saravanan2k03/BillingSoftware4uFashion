@@ -484,4 +484,8 @@ Public Class BILLING
             Billbtn.PerformClick()
         End If
     End Sub
+
+    Private Sub BILLING_Closed(sender As Object, e As EventArgs) Handles Me.Closed
+
+    End Sub
 End Class
