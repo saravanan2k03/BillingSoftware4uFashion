@@ -1,4 +1,5 @@
 ﻿Imports System.Data.SqlClient
+Imports System.Drawing.Printing
 Imports System.Security.Cryptography
 Imports System.Windows.Forms.VisualStyles.VisualStyleElement
 
@@ -339,6 +340,7 @@ Public Class BILLING
                                     If ReduceQuantity = 1 Then
                                         Dim Exec As Int32 = QueryProcess(InsertCusidQuery, parameters)
                                         If Exec = 1 Then
+                                            GenerateBill()
                                             GeneratetheBillNo()
                                             InitialLoad()
                                         End If
@@ -367,7 +369,130 @@ Public Class BILLING
     End Sub
 
     Private Sub GenerateBill()
+        changelongpaper()
+        Dim printDialog As New PrintDialog()
+        printDialog.Document = PD
+        If printDialog.ShowDialog() = DialogResult.OK Then
+            PD.Print()
+        End If
+    End Sub
 
+
+    Dim WithEvents PD As New PrintDocument
+    'Dim PPD As New PrintPreviewDialog
+    Dim longpaper As Integer
+    Sub changelongpaper()
+        Dim rowcount As Integer
+        longpaper = 0
+        rowcount = BillingGrid.Rows.Count
+        longpaper = rowcount * 15
+        longpaper = longpaper + 200
+    End Sub
+
+
+    Private Sub PD_BeginPrint(sender As Object, e As PrintEventArgs) Handles PD.BeginPrint
+        Dim pagesetup As New PageSettings
+        'pagesetup.PaperSize = New PaperSize("Custom", 250, 500) 'fixed size
+        pagesetup.PaperSize = New PaperSize("Custom", 250, longpaper)
+        PD.DefaultPageSettings = pagesetup
+    End Sub
+
+    Private Sub PD_PrintPage(sender As Object, e As PrintPageEventArgs) Handles PD.PrintPage
+        Dim d As String = DateTime.Now.ToString("dd-MM-yyyy")
+        Dim stat As String = TimeOfDay.ToString("h:mm:ss tt")
+        Dim f8 As New Font("Calibri", 8, FontStyle.Regular)
+        Dim f10 As New Font("Calibri", 10, FontStyle.Regular)
+        Dim f10b As New Font("Calibri", 10, FontStyle.Bold)
+        Dim f14 As New Font("Calibri", 14, FontStyle.Bold)
+
+        Dim leftmargin As Integer = PD.DefaultPageSettings.Margins.Left
+        Dim centermargin As Integer = PD.DefaultPageSettings.PaperSize.Width / 2
+        Dim rightmargin As Integer = PD.DefaultPageSettings.PaperSize.Width
+        Dim rightmarginforto As Integer = PD.DefaultPageSettings.Margins.Right
+        Dim rightmarginforpr As Integer = PD.DefaultPageSettings.Margins.Right
+
+        'font alignment
+        Dim right As New StringFormat
+        Dim center As New StringFormat
+        Dim pr As New StringFormat
+
+        right.Alignment = StringAlignment.Far
+        center.Alignment = StringAlignment.Center
+        pr.Alignment = StringAlignment.Near
+
+
+        Dim line As String
+        line = "--------------------------------------------------------------------------"
+        Dim b As String
+        b = Me.Bill_no.Text
+        'range from top
+        e.Graphics.DrawString("4U FASHION LOOK", f14, Brushes.Black, centermargin, 5, center)
+
+        e.Graphics.DrawString(DateTime.Now(), f8, Brushes.Black, 120, 60)
+
+
+        e.Graphics.DrawString("BillNo", f8, Brushes.Black, 0, 60)
+        e.Graphics.DrawString(":", f8, Brushes.Black, 50, 60)
+        e.Graphics.DrawString(b, f8, Brushes.Black, 70, 60)
+
+        e.Graphics.DrawString("Cashier", f8, Brushes.Black, 0, 75)
+        e.Graphics.DrawString(":", f8, Brushes.Black, 50, 75)
+        e.Graphics.DrawString("Admin", f8, Brushes.Black, 70, 75)
+
+        'e.Graphics.DrawString(DateTime.Now(), f8, Brushes.Black, 0, 90)
+
+        e.Graphics.DrawString(line, f8, Brushes.Black, 0, 100)
+
+        Dim height As Integer 'DGV Position
+        BillingGrid.AllowUserToAddRows = False
+        'If DataGridView1.CurrentCell.Value Is Nothing Then
+        '    Exit Sub
+        'Else
+        Dim hi As Integer
+        Dim Queryes = "select ref_id As 'REF ID',pro.Product_name As 'PRODUCT NAME',cat.Category As 'CATEGORY',Brand.Brand As 'BRAND',Bill.Quantity As 'QUANTITY',Bill.Price As 'PRICE',Bill.Total 'TOTAL' from dbo.Billing As Bill inner join Products As pro on pro.Product_id = Bill.Product_id  inner join Category As cat on cat.Cat_id = pro.Cat_id inner join Brands As Brand on Brand.Brand_id = pro.Brand_id where Bill.Status = 0 And Bill.Billing_no = @BillNO"
+        height = 17
+        hi = 0
+        For row As Integer = 0 To BillingGrid.RowCount - 1
+            height += 20 + hi
+            'MsgBox(row)
+            'Product Name
+            'hi = row * 2
+            hi = 17 + row
+            e.Graphics.DrawString(BillingGrid.Rows(row).Cells(3).Value.ToString, f10, Brushes.Black, 0, 100 + height)
+            'Quantity
+            e.Graphics.DrawString(BillingGrid.Rows(row).Cells(6).Value.ToString, f10, Brushes.Black, 25, 100 + height + hi)
+            'price
+            e.Graphics.DrawString(BillingGrid.Rows(row).Cells(7).Value.ToString, f10, Brushes.Black, 80, 100 + height + hi)
+            'Total
+            e.Graphics.DrawString(BillingGrid.Rows(row).Cells(8).Value.ToString, f10, Brushes.Black, 150, 100 + height + hi)
+
+        Next
+        'End If
+
+        Dim height2 As Integer
+        height2 = 110 + height + hi + 20
+        sumprice() 'call sub
+        e.Graphics.DrawString(line, f8, Brushes.Black, 0, height2)
+        'e.Graphics.DrawString("0", f10b, Brushes.Black, 170, 10 + height2)
+        e.Graphics.DrawString("Grand Total:" + " " + Me.grandtot.Text, f10b, Brushes.Black, 10, 10 + height2 + 25)
+        e.Graphics.DrawString("Total Quantity:" + " " + t_qty.ToString(), f10b, Brushes.Black, 10, 10 + height2)
+        e.Graphics.DrawString("~ Thanks for ordering ~", f10, Brushes.Black, centermargin, 35 + height2 + 20, center)
+        'e.Graphics.DrawString("~ Nosware Store ~", f10, Brushes.Black, centermargin, 50 + height2, center)
+    End Sub
+    Dim t_price As Integer
+    Dim t_qty As Integer
+    Sub sumprice()
+        Dim countprice As Integer = 0
+        For rowitem As Integer = 0 To BillingGrid.RowCount - 1
+            countprice = countprice + Val(BillingGrid.Rows(rowitem).Cells(7).Value * BillingGrid.Rows(rowitem).Cells(6).Value)
+        Next
+        t_price = countprice
+
+        Dim countqty As Integer = 0
+        For rowitem As Integer = 0 To BillingGrid.RowCount - 1
+            countqty = countqty + BillingGrid.Rows(rowitem).Cells(6).Value
+        Next
+        t_qty = countqty
     End Sub
 
     Private Sub LoadAutoComplete()
@@ -431,6 +556,7 @@ Public Class BILLING
 
     Private Sub Billbtn_Click(sender As Object, e As EventArgs) Handles Billbtn.Click
         FinalizeBill()
+        'GenerateBill()
     End Sub
 
 
